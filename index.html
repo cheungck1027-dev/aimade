@@ -516,6 +516,7 @@ const SB_URL = "https://ulntmokjyvbxmkdejagt.supabase.co";
 const SB_KEY = "sb_publishable_xmQTDQxS8vOUP0q8OTHFOQ_ymHOihp2";
 const sb = window.supabase.createClient(SB_URL, SB_KEY);
 let currentUser = null;
+let isAdmin = false;
 let realWorks = [];
 let myLikes = new Set();
 
@@ -585,7 +586,7 @@ const I = {
   lg_title:"登入 / 註冊",lg_sub:"入你嘅電郵,我哋會寄一條登入連結畀你 — 唔使密碼。",
   lg_send:"寄登入連結",lg_sent:"寄咗喇!去你電郵撳條連結(可能喺垃圾郵件)",lg_bad:"電郵格式唔啱",lg_fail:"寄唔到,一陣再試",
   by:"作者",tip:"打賞",view:"睇下",free:"免費",demo:"示範",del:"刪除",del_confirm:"確定刪除呢個作品?",del_done:"刪除咗",
-  need_login_like:"登入先可以讚好",trending:"熱門",no_works:"仲未有作品 — 做第一個上載嘅人!",
+  need_login_like:"登入先可以讚好",trending:"熱門",no_works:"仲未有作品 — 做第一個上載嘅人!",admin:"管理員",
  },
  en:{
   nav_home:"Home",nav_explore:"Explore",nav_upload:"Upload",nav_pricing:"Pricing",
@@ -651,7 +652,7 @@ const I = {
   lg_title:"Sign in / Sign up",lg_sub:"Enter your email and we'll send you a sign-in link — no password needed.",
   lg_send:"Send magic link",lg_sent:"Sent! Check your email and click the link (check spam too)",lg_bad:"Invalid email format",lg_fail:"Could not send, try again later",
   by:"by",tip:"Tip",view:"View",free:"Free",demo:"Demo",del:"Delete",del_confirm:"Delete this work?",del_done:"Deleted",
-  need_login_like:"Sign in to like",trending:"Trending",no_works:"No works yet — be the first to upload!",
+  need_login_like:"Sign in to like",trending:"Trending",no_works:"No works yet — be the first to upload!",admin:"Admin",
  }
 };
 let lang = "zh";
@@ -712,7 +713,7 @@ function cardHTML(w,i){
     ? `<button class="icon-btn" onclick="event.stopPropagation();toast(t('demo'))">💜 ${w.likeCount}</button>`
     : `<button class="${likeCls}" onclick="event.stopPropagation();toggleLike('${w.id}')">💜 ${w.likeCount}</button>`;
   const viewBtn = (!isDemo && w.link) ? `<button class="icon-btn" onclick="event.stopPropagation();window.open('${esc(w.link)}','_blank','noopener')">${t("view")}</button>` : "";
-  const delBtn = (!isDemo && currentUser && currentUser.id===w.owner) ? `<button class="icon-btn" onclick="event.stopPropagation();delWork('${w.id}')">🗑</button>` : "";
+  const delBtn = (!isDemo && currentUser && (currentUser.id===w.owner || isAdmin)) ? `<button class="icon-btn" onclick="event.stopPropagation();delWork('${w.id}')">🗑</button>` : "";
   const desc = (!isDemo && w.description) ? `<div class="card-desc">${esc(w.description)}</div>` : "";
   return `<div class="card">
     <div class="thumb" style="${thumbStyle}">${emoji}${badge}</div>
@@ -760,7 +761,8 @@ function renderAuth(){
   const area = document.getElementById("authArea");
   if(currentUser){
     const name = esc((currentUser.email||"").split("@")[0]);
-    area.innerHTML = `<span class="user-chip">👋 <b>${name}</b></span> <button class="btn btn-ghost" onclick="signOut()">${t("signout")}</button>`;
+    const shield = isAdmin ? ` 🛡️ <span style="color:var(--gold);font-weight:700">${t("admin")}</span>` : "";
+    area.innerHTML = `<span class="user-chip">👋 <b>${name}</b>${shield}</span> <button class="btn btn-ghost" onclick="signOut()">${t("signout")}</button>`;
   }else{
     area.innerHTML = `<button class="btn btn-ghost" onclick="openLogin()">${t("signin")}</button> <button class="btn btn-primary" onclick="go('upload')">${t("cta_upload")}</button>`;
   }
@@ -777,9 +779,18 @@ async function sendMagicLink(){
   st.textContent = error ? t("lg_fail") : t("lg_sent");
 }
 async function signOut(){ await sb.auth.signOut(); }
+async function checkAdmin(){
+  isAdmin = false;
+  if(currentUser){
+    try{
+      const { data } = await sb.from("admins").select("user_id").eq("user_id", currentUser.id).maybeSingle();
+      isAdmin = !!data;
+    }catch(e){ console.error(e); }
+  }
+}
 sb.auth.onAuthStateChange((_e, session)=>{
   currentUser = session ? session.user : null;
-  renderAuth(); loadWorks();
+  checkAdmin().then(()=>{ renderAuth(); loadWorks(); });
 });
 
 /* ============ Upload ============ */
