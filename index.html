@@ -204,6 +204,7 @@ nav{position:sticky;top:0;z-index:100;background:rgba(250,248,243,.92);backdrop-
 .modal input{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px 14px;color:var(--text);font-size:14px;font-family:inherit;margin-bottom:13px}
 .modal input:focus{outline:none;border-color:var(--ink)}
 .modal .status{font-size:12.5px;color:var(--gold);min-height:20px;margin-top:10px}
+.lg-tick{width:56px;height:56px;border-radius:50%;background:var(--card2);border:1px solid var(--border2);color:var(--accent);font-size:28px;font-weight:700;display:flex;align-items:center;justify-content:center;margin:4px auto 16px}
 .modal.wide{max-width:560px;padding:0;overflow:hidden}
 .wm-cover{height:220px;display:flex;align-items:center;justify-content:center;background-size:cover;background-position:center;border-bottom:1px solid var(--border)}
 .wm-cover .thumb-letter{font-size:76px}
@@ -525,11 +526,19 @@ footer{border-top:1px solid var(--border);margin-top:56px;background:var(--bg2)}
 <div class="modal-bg" id="loginModal">
   <div class="modal">
     <button class="close" onclick="closeLogin()">×</button>
-    <h3 data-i18n="lg_title"></h3>
-    <p data-i18n="lg_sub"></p>
-    <input type="email" id="lgEmail" placeholder="you@email.com">
-    <button class="btn btn-primary" style="width:100%" id="lgBtn" data-i18n="lg_send" onclick="sendMagicLink()"></button>
-    <div class="status" id="lgStatus"></div>
+    <div id="lgForm">
+      <h3 data-i18n="lg_title"></h3>
+      <p data-i18n="lg_sub"></p>
+      <input type="email" id="lgEmail" placeholder="you@email.com">
+      <button class="btn btn-primary" style="width:100%" id="lgBtn" data-i18n="lg_send" onclick="sendMagicLink()"></button>
+      <div class="status" id="lgStatus"></div>
+    </div>
+    <div id="lgDone" style="display:none;text-align:center;padding:6px 0">
+      <div class="lg-tick">✓</div>
+      <h3 data-i18n="lg_done_t" style="margin-bottom:8px"></h3>
+      <p id="lgDoneMsg" style="margin-bottom:20px"></p>
+      <button class="btn btn-primary" style="width:100%" data-i18n="lg_ok" onclick="closeLogin()"></button>
+    </div>
   </div>
 </div>
 
@@ -618,7 +627,8 @@ const I = {
   foot_rights:"版權所有",
   coming_soon:"快將推出 — 而家先免費用住",
   lg_title:"登入 / 註冊",lg_sub:"入你嘅電郵,我哋會寄一條登入連結畀你 — 唔使密碼。",
-  lg_send:"寄登入連結",lg_sent:"寄咗喇!去你電郵撳條連結(可能喺垃圾郵件)",lg_bad:"電郵格式唔啱",lg_fail:"寄唔到,一陣再試",
+  lg_send:"寄登入連結",lg_sending:"寄緊…",lg_sent:"寄咗喇!去你電郵撳條連結(可能喺垃圾郵件)",lg_bad:"電郵格式唔啱",lg_fail:"寄唔到,一陣再試",
+  lg_done_t:"檢查你嘅郵箱",lg_done_p:"登入連結已經寄咗去 {email}。撳咗條連結就會自動登入 — 搵唔到嘅話,睇下垃圾郵件。",lg_ok:"知道喇",
   by:"作者",tip:"打賞",view:"睇下",free:"免費",demo:"示範",del:"刪除",del_confirm:"確定刪除呢個作品?",del_done:"刪除咗",
   need_login_like:"登入先可以讚好",trending:"熱門",no_works:"仲未有作品 — 做第一個上載嘅人!",admin:"管理員",
   share:"複製連結",copy_ok:"連結已複製!分享出去啦",report:"舉報",report_why:"舉報原因?(例如:侵權、垃圾內容)",report_ok:"收到舉報,多謝你幫手維護社群",open_work:"開啟作品",like:"讚好",
@@ -686,7 +696,8 @@ const I = {
   foot_rights:"All rights reserved",
   coming_soon:"Coming soon — everything is free for now",
   lg_title:"Sign in / Sign up",lg_sub:"Enter your email and we'll send you a sign-in link — no password needed.",
-  lg_send:"Send magic link",lg_sent:"Sent! Check your email and click the link (check spam too)",lg_bad:"Invalid email format",lg_fail:"Could not send, try again later",
+  lg_send:"Send magic link",lg_sending:"Sending…",lg_sent:"Sent! Check your email and click the link (check spam too)",lg_bad:"Invalid email format",lg_fail:"Could not send, try again later",
+  lg_done_t:"Check your inbox",lg_done_p:"We've sent a sign-in link to {email}. Click it and you'll be logged in automatically — check spam if you can't find it.",lg_ok:"Got it",
   by:"by",tip:"Tip",view:"View",free:"Free",demo:"Demo",del:"Delete",del_confirm:"Delete this work?",del_done:"Deleted",
   need_login_like:"Sign in to like",trending:"Trending",no_works:"No works yet — be the first to upload!",admin:"Admin",
   share:"Copy link",copy_ok:"Link copied! Go share it",report:"Report",report_why:"Reason for reporting? (e.g. infringement, spam)",report_ok:"Report received — thanks for keeping the community safe",open_work:"Open work",like:"Like",
@@ -850,16 +861,25 @@ function renderAuth(){
     area.innerHTML = `<button class="btn btn-ghost" onclick="openLogin()">${t("signin")}</button> <button class="btn btn-primary" onclick="go('upload')">${t("cta_upload")}</button>`;
   }
 }
-function openLogin(){ document.getElementById("loginModal").classList.add("on"); }
+function openLogin(){
+  document.getElementById("lgForm").style.display = "block";
+  document.getElementById("lgDone").style.display = "none";
+  document.getElementById("lgStatus").textContent = "";
+  document.getElementById("loginModal").classList.add("on");
+}
 function closeLogin(){ document.getElementById("loginModal").classList.remove("on"); }
 async function sendMagicLink(){
   const email = document.getElementById("lgEmail").value.trim();
   const st = document.getElementById("lgStatus");
   if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){ st.textContent = t("lg_bad"); return; }
-  document.getElementById("lgBtn").disabled = true;
-  const { error } = await sb.auth.signInWithOtp({ email, options:{ emailRedirectTo: "https://aimade.world/" } });
-  document.getElementById("lgBtn").disabled = false;
-  st.textContent = error ? t("lg_fail") : t("lg_sent");
+  const btn = document.getElementById("lgBtn");
+  btn.disabled = true; btn.textContent = t("lg_sending");
+  const { error } = await sb.auth.signInWithOtp({ email, options:{ emailRedirectTo: location.origin + "/" } });
+  btn.disabled = false; btn.textContent = t("lg_send");
+  if(error){ st.textContent = t("lg_fail"); return; }
+  document.getElementById("lgForm").style.display = "none";
+  document.getElementById("lgDone").style.display = "block";
+  document.getElementById("lgDoneMsg").textContent = t("lg_done_p").replace("{email}", email);
 }
 async function signOut(){ await sb.auth.signOut(); }
 async function checkAdmin(){
