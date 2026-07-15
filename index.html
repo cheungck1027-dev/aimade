@@ -874,7 +874,8 @@ async function checkAdmin(){
 }
 sb.auth.onAuthStateChange((_e, session)=>{
   currentUser = session ? session.user : null;
-  checkAdmin().then(()=>{ renderAuth(); loadWorks(); });
+  if(!currentUser && activeCat==="mine") activeCat = "all";
+  checkAdmin().then(()=>{ renderAuth(); renderChips(); loadWorks(); });
 });
 
 /* ============ Upload ============ */
