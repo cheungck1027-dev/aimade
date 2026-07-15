@@ -4,6 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AIMade — Show the world what you built with AI</title>
+<meta name="description" content="AIMade 係全球 AI 創作者嘅分享社群 — 分享你用 AI 做嘅網頁、App、圖片、影片、Prompt 同工具。The global community for sharing AI-made work.">
+<meta property="og:title" content="AIMade — Show the world what you built with AI">
+<meta property="og:description" content="Upload your AI-made web apps, images, videos, prompts and tools. Free to showcase — sell only if you want to.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://cheungck1027-dev.github.io/aimade/">
+<meta name="twitter:card" content="summary">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='24' fill='%236d7cff'/><text x='50' y='72' font-size='58' text-anchor='middle' fill='white' font-family='Arial' font-weight='bold'>A</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -220,6 +227,24 @@ footer{border-top:1px solid var(--border);margin-top:60px;background:var(--bg2)}
 .toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(8px);background:var(--card2);border:1px solid var(--accent);color:var(--text);padding:13px 26px;border-radius:12px;font-weight:600;font-size:14px;opacity:0;transition:.3s;pointer-events:none;z-index:400;box-shadow:var(--shadow)}
 .toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
 @media(max-width:900px){.fee-wrap,.upload-grid,.foot-grid{grid-template-columns:1fr}.hero h1{font-size:38px}.nav-links{display:none}}
+
+/* ===== MOBILE MENU ===== */
+.menu-btn{display:none;background:transparent;border:1px solid var(--border2);color:var(--text);border-radius:8px;padding:6px 12px;cursor:pointer;font-size:17px;line-height:1}
+@media(max-width:900px){
+  .menu-btn{display:inline-flex}
+  .nav-links{position:absolute;top:68px;left:0;right:0;background:var(--bg2);flex-direction:column;padding:12px;border-bottom:1px solid var(--border);z-index:99}
+  .nav-links.open{display:flex}
+  .nav-links button{text-align:left;padding:13px 16px;font-size:15px}
+}
+
+/* ===== WORK DETAIL MODAL ===== */
+.modal.wide{max-width:560px;padding:0;overflow:hidden}
+.wm-cover{height:230px;display:flex;align-items:center;justify-content:center;font-size:70px;background-size:cover;background-position:center}
+.wm-body{padding:26px 30px 30px}
+.wm-body h3{font-size:22px;font-weight:800;margin-bottom:4px}
+.wm-meta{color:var(--faint);font-size:13px;margin-bottom:16px}
+.wm-desc{color:var(--muted);font-size:14.5px;margin-bottom:22px;white-space:pre-wrap;max-height:180px;overflow:auto}
+.wm-actions{display:flex;gap:10px;flex-wrap:wrap}
 </style>
 </head>
 <body>
@@ -230,13 +255,14 @@ footer{border-top:1px solid var(--border);margin-top:60px;background:var(--bg2)}
       <div class="logo-mark">A</div>
       <div class="logo-word">AI<span>Made</span></div>
     </div>
-    <div class="nav-links">
+    <div class="nav-links" id="navLinks">
       <button id="nav-home" class="active" onclick="go('home')" data-i18n="nav_home"></button>
       <button id="nav-explore" onclick="go('explore')" data-i18n="nav_explore"></button>
       <button id="nav-upload" onclick="go('upload')" data-i18n="nav_upload"></button>
       <button id="nav-pricing" onclick="go('pricing')" data-i18n="nav_pricing"></button>
     </div>
     <div class="nav-right">
+      <button class="menu-btn" onclick="toggleMenu()">☰</button>
       <button class="lang-btn" onclick="toggleLang()" id="langBtn">EN</button>
       <span id="authArea"></span>
     </div>
@@ -513,6 +539,14 @@ footer{border-top:1px solid var(--border);margin-top:60px;background:var(--bg2)}
   </div>
 </div>
 
+<!-- WORK DETAIL MODAL -->
+<div class="modal-bg" id="workModal">
+  <div class="modal wide">
+    <button class="close" onclick="closeWork()" style="z-index:5;background:rgba(8,10,14,.5);border-radius:50%;width:32px;height:32px">×</button>
+    <div id="workModalBody"></div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -592,6 +626,7 @@ const I = {
   lg_send:"寄登入連結",lg_sent:"寄咗喇!去你電郵撳條連結(可能喺垃圾郵件)",lg_bad:"電郵格式唔啱",lg_fail:"寄唔到,一陣再試",
   by:"作者",tip:"打賞",view:"睇下",free:"免費",demo:"示範",del:"刪除",del_confirm:"確定刪除呢個作品?",del_done:"刪除咗",
   need_login_like:"登入先可以讚好",trending:"熱門",no_works:"仲未有作品 — 做第一個上載嘅人!",admin:"管理員",
+  cat_mine:"我嘅作品",share:"複製連結",copy_ok:"連結已複製!快啲分享出去",report:"舉報",report_why:"舉報原因?(例如:侵權、垃圾內容)",report_ok:"收到舉報,多謝你幫手維護社群 🙏",open_work:"開啟作品",
  },
  en:{
   nav_home:"Home",nav_explore:"Explore",nav_upload:"Upload",nav_pricing:"Pricing",
@@ -658,6 +693,7 @@ const I = {
   lg_send:"Send magic link",lg_sent:"Sent! Check your email and click the link (check spam too)",lg_bad:"Invalid email format",lg_fail:"Could not send, try again later",
   by:"by",tip:"Tip",view:"View",free:"Free",demo:"Demo",del:"Delete",del_confirm:"Delete this work?",del_done:"Deleted",
   need_login_like:"Sign in to like",trending:"Trending",no_works:"No works yet — be the first to upload!",admin:"Admin",
+  cat_mine:"My works",share:"Copy link",copy_ok:"Link copied! Go share it",report:"Report",report_why:"Reason for reporting? (e.g. infringement, spam)",report_ok:"Report received — thanks for keeping the community safe 🙏",open_work:"Open work",
  }
 };
 let lang = "zh";
@@ -672,6 +708,7 @@ const DEMO = [
  {demo:1,title:{zh:"Excel 自動報表工具",en:"Excel Auto-report Tool"},owner_name:"SheetsGuru",category:"tool",likeCount:120,price:0},
  {demo:1,title:{zh:"AI 食譜推薦 App",en:"AI Recipe Finder App"},owner_name:"Foodie AI",category:"app",likeCount:87,price:0}
 ];
+DEMO.forEach((w,i)=>{ w.id = "demo-"+i; });
 const CAT_EMOJI = {app:"📱",image:"🎨",video:"🎬",music:"🎵",prompt:"✨",tool:"🛠️",game:"🎮",design:"🧊",writing:"✍️",other:"📦"};
 const GRADS = ["linear-gradient(135deg,#4a3aff,#7c5cff)","linear-gradient(135deg,#ff5c8a,#f5b94e)","linear-gradient(135deg,#2dd4a7,#38b6ff)","linear-gradient(135deg,#7c5cff,#2dd4a7)","linear-gradient(135deg,#f5b94e,#ff6b6b)","linear-gradient(135deg,#38b6ff,#7c5cff)"];
 const AV_COLORS=["linear-gradient(135deg,#6d7cff,#2dd4a7)","linear-gradient(135deg,#f5b94e,#ff6b8b)","linear-gradient(135deg,#2dd4a7,#38b6ff)","linear-gradient(135deg,#ff5c8a,#7c5cff)"];
@@ -692,6 +729,8 @@ async function loadWorks(){
     }
   }catch(e){ console.error(e); realWorks = []; }
   renderExplore(); renderFeatured(); renderStats();
+  const wid = new URLSearchParams(location.search).get("w");
+  if(wid && !window._deepOpened){ window._deepOpened = true; openWork(wid); }
 }
 function allWorks(){ return [...realWorks, ...DEMO]; }
 function renderStats(){
@@ -720,7 +759,7 @@ function cardHTML(w,i){
   const viewBtn = (!isDemo && w.link) ? `<button class="icon-btn" onclick="event.stopPropagation();window.open('${esc(w.link)}','_blank','noopener')">${t("view")}</button>` : "";
   const delBtn = (!isDemo && currentUser && (currentUser.id===w.owner || isAdmin)) ? `<button class="icon-btn" onclick="event.stopPropagation();delWork('${w.id}')">🗑</button>` : "";
   const desc = (!isDemo && w.description) ? `<div class="card-desc">${esc(w.description)}</div>` : "";
-  return `<div class="card">
+  return `<div class="card" onclick="openWork('${w.id}')">
     <div class="thumb" style="${thumbStyle}">${emoji}${badge}</div>
     <div class="card-body">
       <div class="card-top">
@@ -738,14 +777,15 @@ function cardHTML(w,i){
 
 let activeCat = "all";
 function renderChips(){
-  document.getElementById("chips").innerHTML = ["all",...CATS].map(c=>
+  const list = currentUser ? ["all","mine",...CATS] : ["all",...CATS];
+  document.getElementById("chips").innerHTML = list.map(c=>
     `<button class="chip ${c===activeCat?'active':''}" onclick="filterCat('${c}')">${t("cat_"+c)}</button>`).join("");
 }
 function filterCat(c){ activeCat=c; renderChips(); renderExplore(); }
 function renderExplore(){
   const q = (document.getElementById("searchBox").value||"").toLowerCase();
   const sort = document.getElementById("sortSel").value;
-  let list = allWorks().filter(w => activeCat==="all" || w.category===activeCat);
+  let list = allWorks().filter(w => activeCat==="all" || (activeCat==="mine" ? (!w.demo && currentUser && w.owner===currentUser.id) : w.category===activeCat));
   if(q) list = list.filter(w => {
     const title = w.demo ? (w.title.zh+" "+w.title.en) : (w.title||"");
     return title.toLowerCase().includes(q) || (w.owner_name||"").toLowerCase().includes(q);
@@ -760,6 +800,45 @@ function renderFeatured(){
   const top = allWorks().slice().sort((a,b)=>b.likeCount-a.likeCount).slice(0,3);
   document.getElementById("featuredGrid").innerHTML = top.map(cardHTML).join("");
 }
+
+/* ============ Work detail / share / report ============ */
+function openWork(id){
+  const w = allWorks().find(x=>String(x.id)===String(id));
+  if(!w) return;
+  const isDemo = !!w.demo;
+  const title = isDemo ? w.title[lang] : esc(w.title);
+  const name = esc(w.owner_name||"Anonymous");
+  const coverStyle = (!isDemo && w.cover_url) ? `background-image:url('${esc(w.cover_url)}')` : `background:${GRADS[Math.max(0,CATS.indexOf(w.category))%GRADS.length]}`;
+  const emoji = (!isDemo && w.cover_url) ? "" : (CAT_EMOJI[w.category]||"✨");
+  const price = Number(w.price)>0 ? `US$${Number(w.price)}` : t("free");
+  const linkBtn = (!isDemo && w.link) ? `<button class="btn btn-primary" onclick="window.open('${esc(w.link)}','_blank','noopener')">${t("open_work")}</button>` : "";
+  const shareBtn = !isDemo ? `<button class="btn btn-ghost" onclick="shareWork('${w.id}')">🔗 ${t("share")}</button>` : "";
+  const reportBtn = !isDemo ? `<button class="btn btn-ghost" onclick="reportWork('${w.id}')">🚩 ${t("report")}</button>` : "";
+  const delBtn = (!isDemo && currentUser && (currentUser.id===w.owner || isAdmin)) ? `<button class="btn btn-ghost" onclick="closeWork();delWork('${w.id}')">🗑 ${t("del")}</button>` : "";
+  document.getElementById("workModalBody").innerHTML = `
+    <div class="wm-cover" style="${coverStyle}">${emoji}</div>
+    <div class="wm-body">
+      <h3>${title}</h3>
+      <div class="wm-meta">${t("by")} ${name} · ${t("cat_"+w.category)} · ${price}${isDemo?` · ${t("demo")}`:""}</div>
+      ${(!isDemo && w.description)?`<div class="wm-desc">${esc(w.description)}</div>`:""}
+      <div class="wm-actions">${linkBtn}${shareBtn}${reportBtn}${delBtn}</div>
+    </div>`;
+  document.getElementById("workModal").classList.add("on");
+}
+function closeWork(){ document.getElementById("workModal").classList.remove("on"); }
+async function shareWork(id){
+  const url = location.origin + location.pathname + "?w=" + id;
+  try{ await navigator.clipboard.writeText(url); toast(t("copy_ok")); }
+  catch(e){ prompt("Link:", url); }
+}
+async function reportWork(id){
+  if(!currentUser){ toast(t("up_need_login")); openLogin(); return; }
+  const reason = prompt(t("report_why"));
+  if(reason===null) return;
+  const { error } = await sb.from("reports").insert({ work_id:id, reporter:currentUser.id, reason: reason.trim()||null });
+  toast(error ? t("up_fail") : t("report_ok"));
+}
+function toggleMenu(){ document.getElementById("navLinks").classList.toggle("open"); }
 
 /* ============ Auth ============ */
 function renderAuth(){
@@ -855,6 +934,7 @@ async function toggleLike(workId){
 
 /* ============ Nav / lang / misc ============ */
 function go(p){
+  document.getElementById("navLinks").classList.remove("open");
   document.querySelectorAll(".page").forEach(x=>x.classList.remove("show"));
   document.getElementById("page-"+p).classList.add("show");
   document.querySelectorAll(".nav-links button").forEach(x=>x.classList.remove("active"));
@@ -886,6 +966,7 @@ function toast(msg){
 const io = new IntersectionObserver(es=>es.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add("in"); io.unobserve(e.target);} }),{threshold:.08});
 function revealAll(){ document.querySelectorAll(".page.show .reveal:not(.in)").forEach(el=>io.observe(el)); }
 
+document.querySelectorAll(".modal-bg").forEach(m=>m.addEventListener("click",e=>{ if(e.target===m) m.classList.remove("on"); }));
 applyLang();
 revealAll();
 loadWorks();
