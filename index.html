@@ -364,7 +364,7 @@ footer{border-top:1px solid var(--border);margin-top:56px;background:var(--bg2)}
         <div class="field"><label data-i18n="up_cover"></label><input type="file" id="upCover" accept="image/*"></div>
         <div class="pricing-row">
           <div class="field"><label data-i18n="up_price"></label>
-            <select id="upPrice"><option value="0" data-i18n="up_free"></option><option value="5">US$5</option><option value="10">US$10</option><option value="25">US$25</option></select>
+            <select id="upPrice"><option value="0" data-i18n="up_free"></option><option value="5" disabled>US$5</option><option value="10" disabled>US$10</option><option value="25" disabled>US$25</option></select>
           </div>
           <div class="field"><label data-i18n="up_tips"></label>
             <select id="upTips"><option value="true" data-i18n="yes"></option><option value="false" data-i18n="no"></option></select>
@@ -549,12 +549,12 @@ const I = {
   up_title:"上傳你的 AI 作品",up_sub:"自選分類、自訂價格,發佈即刻上架,不需等待審核。",
   up_name:"作品名稱",up_cat:"分類",up_desc:"簡介(說說你用了哪些 AI 工具)",
   up_link:"作品連結(demo / 下載 / 網站)",up_cover:"封面圖片(選填)",
-  up_price:"價格",up_free:"免費",up_tips:"接受打賞?",yes:"接受",no:"不接受",
+  up_price:"價格(出售功能即將推出)",up_free:"免費",up_tips:"接受打賞?(即將推出)",yes:"接受",no:"不接受",
   up_submit:"發佈作品",up_need_name:"請輸入作品名稱",up_need_login:"請先登入才能發佈",
   up_publishing:"發佈中…",up_done:"發佈成功!你的作品已經上架",up_fail:"發佈失敗,請再試一次",
   side1_t:"上架小提示",side1_a:"加上 demo 連結或封面圖,轉換率高 3 倍",side1_b:"寫下你用了哪些 AI 工具,大家都想知道",side1_c:"定價 US$5–25 是最好賣的區間",
-  side2_t:"你能拿到多少?",side2_p:"免費分享完全不收費。出售作品每筆收 10% + US$0.50,已包含 Stripe 手續費、全球匯款、稅務發票 — 你實拿約九成。打賞只收 5%。",
-  pr_eye:"收費方案",pr_title:"簡單透明的定價",pr_sub:"瀏覽免費,分享免費。想賺更多、曝光更多,再升級。",
+  side2_t:"關於出售功能",side2_p:"目前平台處於免費展示階段,出售與打賞功能即將推出。屆時出售作品每筆收 10% + US$0.50(金流費用全包,你實拿約九成),打賞收 5%。現在上傳的作品,功能開通後隨時可以補上定價。",
+  pr_eye:"收費方案",pr_title:"簡單透明的定價",pr_sub:"瀏覽免費,分享免費。出售與付費功能即將推出 — 以下為公佈的定價計劃,現階段全部功能免費使用。",
   per_month:"/月",popular:"最受歡迎",
   pl1_t:"免費",pl1_s:"剛起步的創作者",pl1_keep:"出售:每筆 10% + US$0.50",
   pl1_a:"無限瀏覽與收藏",pl1_b:"最多上傳 3 件作品",pl1_c:"接受打賞(只收 5%)",pl1_d:"沒有月費,賣出才收費",
@@ -565,7 +565,7 @@ const I = {
   start_free:"免費開始",go_pro:"升級 Pro",contact:"聯絡我們",
   faq_title:"常見問題",
   f1_q:"為什麼收 10% + US$0.50?",f1_a:"這個價格已包含 Stripe 信用卡手續費、全球匯款與稅務發票 — 沒有上架費、沒有月費,不賣東西就完全不用付錢。同類平台一般抽 10–20%(例如 Fiverr 20%、Gumroad 10% + US$0.50),我們定在最低的一端;US$0.50 固定費是行業慣例,用來覆蓋每筆交易的金流固定成本。",
-  f2_q:"什麼時候收到錢?",f2_a:"每月 1 號自動結算上月收入,透過 Stripe 匯到你的銀行帳戶或簽帳卡,支援 100+ 個國家和地區。最低提領額 US$10。",
+  f2_q:"什麼時候收到錢?",f2_a:"出售功能推出後:每月 1 號自動結算上月收入,透過 Stripe 匯到你的銀行帳戶或簽帳卡,支援 100+ 個國家和地區。最低提領額 US$10。",
   f3_q:"我的作品版權屬於誰?",f3_a:"永遠屬於你。AIMade 只取得展示與銷售所需的授權,你隨時可以下架。買家獲得的是你設定的使用授權。",
   f4_q:"什麼類型的 AI 作品都收嗎?",f4_a:"網頁、App、圖片、影片、音樂、Prompt、自動化工具都可以。你自選分類,發佈即刻上架;侵權或違規內容會透過自動偵測與社群檢舉處理下架。",
   foot_tag:"全球 AI 創作者的分享社群。讓全世界看見你用 AI 做的作品。",
@@ -618,12 +618,12 @@ const I = {
   up_title:"Upload your AI creation",up_sub:"Pick your own category, set your own price — live instantly, no approval queue.",
   up_name:"Title",up_cat:"Category",up_desc:"Description (mention which AI tools you used)",
   up_link:"Link (demo / download / website)",up_cover:"Cover image (optional)",
-  up_price:"Price",up_free:"Free",up_tips:"Accept tips?",yes:"Yes",no:"No",
+  up_price:"Price (selling coming soon)",up_free:"Free",up_tips:"Accept tips? (coming soon)",yes:"Yes",no:"No",
   up_submit:"Publish",up_need_name:"Please enter a title",up_need_login:"Sign in first to publish",
   up_publishing:"Publishing…",up_done:"Published! Your work is live",up_fail:"Failed to publish, try again",
   side1_t:"Tips for a great listing",side1_a:"Add a demo link or cover image — 3× higher conversion",side1_b:"List the AI tools you used; people love to know",side1_c:"US$5–25 is the best-selling price range",
-  side2_t:"How much do you keep?",side2_p:"Sharing costs nothing. Selling costs 10% + US$0.50 per sale — Stripe fees, global payouts and tax invoicing all included, so you pocket roughly 90%. Tips are just 5%.",
-  pr_eye:"Pricing",pr_title:"Simple, transparent pricing",pr_sub:"Browsing and sharing are free. Upgrade to earn more and get seen more.",
+  side2_t:"About selling",side2_p:"The platform is currently in free-showcase mode; selling and tips are coming soon. Once live, sales will cost 10% + US$0.50 each (payment costs included, you keep roughly 90%) and tips 5%. Works you upload now can add a price anytime after launch.",
+  pr_eye:"Pricing",pr_title:"Simple, transparent pricing",pr_sub:"Browsing and sharing are free. Selling and paid features are coming soon — the plans below are our published pricing; everything is free during this stage.",
   per_month:"/mo",popular:"Most popular",
   pl1_t:"Free",pl1_s:"For creators just getting started",pl1_keep:"Sales: 10% + US$0.50 each",
   pl1_a:"Unlimited browsing & bookmarks",pl1_b:"Upload up to 3 works",pl1_c:"Accept tips (just 5%)",pl1_d:"No monthly fee — pay only when you sell",
@@ -634,7 +634,7 @@ const I = {
   start_free:"Start free",go_pro:"Go Pro",contact:"Contact us",
   faq_title:"Frequently asked questions",
   f1_q:"Why 10% + US$0.50?",f1_a:"That price includes Stripe card fees, global payouts and tax invoicing — no listing fees, no monthly fees, and you pay nothing unless you sell. Similar platforms take 10–20% (Fiverr 20%, Gumroad 10% + US$0.50); we sit at the low end. The US$0.50 fixed fee is industry standard and covers the fixed payment cost of each transaction.",
-  f2_q:"When do I get paid?",f2_a:"Payouts run automatically on the 1st of each month via Stripe to your bank account or debit card, in 100+ countries. Minimum payout US$10.",
+  f2_q:"When do I get paid?",f2_a:"Once selling launches: payouts run automatically on the 1st of each month via Stripe to your bank account or debit card, in 100+ countries. Minimum payout US$10.",
   f3_q:"Who owns the rights to my work?",f3_a:"You do, always. AIMade only takes the licence needed to display and sell it, and you can delist anytime. Buyers receive the usage licence you define.",
   f4_q:"What kinds of AI work can I upload?",f4_a:"Web apps, images, video, music, prompts, and automation tools. You choose your own category and go live instantly; infringing or prohibited content is removed via automated checks and community reports.",
   foot_tag:"The global community for sharing AI-made work. Show the world what you built.",
