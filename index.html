@@ -13,7 +13,7 @@
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='14' fill='%23201d1a'/><text x='50' y='74' font-size='62' text-anchor='middle' fill='%23faf8f4' font-family='Georgia' font-weight='bold'>A</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Inter:wght@400;500;600&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700;900&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <style>
 :root{
   --bg:#faf8f3; --bg2:#f3efe7; --card:#fffdf9; --card2:#f6f2ea;
@@ -648,6 +648,19 @@ function renderStats(){
 
 /* ============ Cards ============ */
 function esc(s){ return (s||"").replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+// 只允許 http/https 連結,擋 javascript: / data: 等注入
+function safeUrl(u){
+  if(!u) return "";
+  try{ const p = new URL(u, location.origin); return (p.protocol==="http:"||p.protocol==="https:") ? p.href : ""; }
+  catch(e){ return ""; }
+}
+// 只允許來自本專案 Supabase storage 的封面圖
+function safeCover(u){
+  const s = safeUrl(u);
+  return s.startsWith(SB_URL + "/storage/") ? s : "";
+}
+// 安全開啟外部連結(不用 inline onclick 字串)
+function openExt(u){ const s = safeUrl(u); if(s) window.open(s,"_blank","noopener,noreferrer"); }
 function titleInitial(w){
   const s = (w.demo ? w.title[lang] : (w.title||"")) .trim();
   return s ? s.charAt(0).toUpperCase() : "A";
@@ -657,14 +670,16 @@ function cardHTML(w,i){
   const title = isDemo ? w.title[lang] : esc(w.title);
   const name = esc(w.owner_name||"Anonymous");
   const init = name.split(/[\s._@-]/).filter(Boolean).map(x=>x[0]).join("").slice(0,2).toUpperCase() || "AI";
-  const thumbStyle = (!isDemo && w.cover_url) ? `background-image:url('${esc(w.cover_url)}')` : `background:${TINTS[i%TINTS.length]}`;
-  const letter = (!isDemo && w.cover_url) ? "" : `<span class="thumb-letter">${esc(titleInitial(w))}</span>`;
+  const cover = isDemo ? "" : safeCover(w.cover_url);
+  const thumbStyle = cover ? `background-image:url("${encodeURI(cover)}")` : `background:${TINTS[i%TINTS.length]}`;
+  const letter = cover ? "" : `<span class="thumb-letter">${esc(titleInitial(w))}</span>`;
   const badge = isDemo ? `<span class="badge">${t("demo")}</span>` : (w.likeCount>=5 ? `<span class="badge hot">${t("trending")}</span>` : `<span class="badge">${t("cat_"+w.category)}</span>`);
   const likeCls = (!isDemo && myLikes.has(w.id)) ? "icon-btn liked" : "icon-btn";
   const likeBtn = isDemo
     ? `<button class="icon-btn" onclick="event.stopPropagation();toast(t('demo'))">♥ ${w.likeCount}</button>`
-    : `<button class="${likeCls}" onclick="event.stopPropagation();toggleLike('${w.id}')">♥ ${w.likeCount}</button>`;
-  const viewBtn = (!isDemo && w.link) ? `<button class="icon-btn" onclick="event.stopPropagation();window.open('${esc(w.link)}','_blank','noopener')">${t("view")}</button>` : "";
+    : `<button class="${likeCls}" onclick="event.stopPropagation();toggleLike('${esc(w.id)}')">♥ ${w.likeCount}</button>`;
+  const link = isDemo ? "" : safeUrl(w.link);
+  const viewBtn = link ? `<button class="icon-btn" onclick="event.stopPropagation();openExt(this.dataset.u)" data-u="${esc(link)}">${t("view")}</button>` : "";
   const delBtn = (!isDemo && currentUser && (currentUser.id===w.owner || isAdmin)) ? `<button class="icon-btn" onclick="event.stopPropagation();delWork('${w.id}')">${t("del")}</button>` : "";
   const desc = (!isDemo && w.description) ? `<div class="card-desc">${esc(w.description)}</div>` : "";
   return `<div class="card" onclick="openWork('${w.id}')">
@@ -716,9 +731,11 @@ function openWork(id){
   const isDemo = !!w.demo;
   const title = isDemo ? w.title[lang] : esc(w.title);
   const name = esc(w.owner_name||"Anonymous");
-  const coverStyle = (!isDemo && w.cover_url) ? `background-image:url('${esc(w.cover_url)}')` : `background:${TINTS[Math.max(0,CATS.indexOf(w.category))%TINTS.length]}`;
-  const letter = (!isDemo && w.cover_url) ? "" : `<span class="thumb-letter">${esc(titleInitial(w))}</span>`;
-  const linkBtn = (!isDemo && w.link) ? `<button class="btn btn-primary" onclick="window.open('${esc(w.link)}','_blank','noopener')">${t("open_work")}</button>` : "";
+  const cover = isDemo ? "" : safeCover(w.cover_url);
+  const coverStyle = cover ? `background-image:url("${encodeURI(cover)}")` : `background:${TINTS[Math.max(0,CATS.indexOf(w.category))%TINTS.length]}`;
+  const letter = cover ? "" : `<span class="thumb-letter">${esc(titleInitial(w))}</span>`;
+  const link = isDemo ? "" : safeUrl(w.link);
+  const linkBtn = link ? `<button class="btn btn-primary" onclick="openExt(this.dataset.u)" data-u="${esc(link)}">${t("open_work")}</button>` : "";
   const shareBtn = !isDemo ? `<button class="btn btn-ghost" onclick="shareWork('${w.id}')">${t("share")}</button>` : "";
   const reportBtn = !isDemo ? `<button class="btn btn-ghost" onclick="reportWork('${w.id}')">${t("report")}</button>` : "";
   const delBtn = (!isDemo && currentUser && (currentUser.id===w.owner || isAdmin)) ? `<button class="btn btn-ghost" onclick="closeWork();delWork('${w.id}')">${t("del")}</button>` : "";
@@ -818,7 +835,7 @@ async function submitUpload(){
       title,
       category: document.getElementById("upCat").value,
       description: document.getElementById("upDesc").value.trim() || null,
-      link: document.getElementById("upLink").value.trim() || null,
+      link: safeUrl(document.getElementById("upLink").value.trim()) || null,
       cover_url,
       price: 0,
       accept_tips: true
