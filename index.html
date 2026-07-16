@@ -473,7 +473,7 @@ const I = {
  zh:{
   nav_home:"首頁",nav_explore:"探索",nav_upload:"上傳作品",nav_pricing:"常見問題",
   signin:"登入",signout:"登出",
-  pill:"全球 AI 創作者分享社群",
+  pill:"把創意變成現實,讓世界看見",
   hero_1:"你用 AI 做的作品,",hero_2:"值得讓全世界看見",
   hero_sub:"AIMade 是全球 AI 創作者的分享社群 — 上傳你的網頁、App、圖片、影片、Prompt 和工具,免費展示給全世界,讓更多人看見你的創作。",
   cta_upload:"上傳我的作品",cta_explore:"探索作品",
@@ -509,7 +509,7 @@ const I = {
   up_link:"作品連結(demo / 下載 / 網站)",up_cover:"封面圖片(選填)",
   up_price:"價格(出售功能即將推出)",up_free:"免費",up_tips:"接受打賞?(即將推出)",yes:"接受",no:"不接受",
   up_submit:"發佈作品",up_need_name:"請輸入作品名稱",up_need_login:"請先登入才能發佈",
-  up_publishing:"發佈中…",up_done:"發佈成功!你的作品已經上架",up_fail:"發佈失敗,請再試一次",
+  up_publishing:"發佈中…",up_done:"發佈成功!你的作品已經上架",up_fail:"發佈失敗,請再試一次",up_img_big:"封面圖片太大,請使用 5MB 以下的圖片",
   side1_t:"上架小提示",side1_a:"加上 demo 連結或封面圖,轉換率高 3 倍",side1_b:"寫下你用了哪些 AI 工具,大家都想知道",side1_c:"定價 US$5–25 是最好賣的區間",
   side2_t:"為什麼免費?",side2_p:"AIMade 現階段專注做好分享社群,所有功能完全免費,也沒有廣告。我們相信先讓好作品被看見,其他一切都是後話。",
   pr_eye:"收費方案",pr_title:"簡單透明的定價",pr_sub:"瀏覽免費,分享免費。出售與付費功能即將推出 — 以下為公佈的定價計劃,現階段全部功能免費使用。",
@@ -542,7 +542,7 @@ const I = {
  en:{
   nav_home:"Home",nav_explore:"Explore",nav_upload:"Upload",nav_pricing:"FAQ",
   signin:"Sign in",signout:"Sign out",
-  pill:"The global community for AI creators",
+  pill:"Turn your ideas into reality — let the world see",
   hero_1:"What you built with AI",hero_2:"deserves to be seen by the world",
   hero_sub:"AIMade is the global community for sharing AI-made work. Upload your web apps, images, videos, prompts and tools — showcase for free and let the world see what you've built.",
   cta_upload:"Upload my work",cta_explore:"Explore creations",
@@ -578,7 +578,7 @@ const I = {
   up_link:"Link (demo / download / website)",up_cover:"Cover image (optional)",
   up_price:"Price (selling coming soon)",up_free:"Free",up_tips:"Accept tips? (coming soon)",yes:"Yes",no:"No",
   up_submit:"Publish",up_need_name:"Please enter a title",up_need_login:"Sign in first to publish",
-  up_publishing:"Publishing…",up_done:"Published! Your work is live",up_fail:"Failed to publish, try again",
+  up_publishing:"Publishing…",up_done:"Published! Your work is live",up_fail:"Failed to publish, try again",up_img_big:"Cover image too large — please use one under 5MB",
   side1_t:"Tips for a great listing",side1_a:"Add a demo link or cover image — 3× higher conversion",side1_b:"List the AI tools you used; people love to know",side1_c:"US$5–25 is the best-selling price range",
   side2_t:"Why free?",side2_p:"AIMade is focused on building a great sharing community — everything is completely free, with no ads. We believe in letting good work be seen first; everything else can come later.",
   pr_eye:"Pricing",pr_title:"Simple, transparent pricing",pr_sub:"Browsing and sharing are free. Selling and paid features are coming soon — the plans below are our published pricing; everything is free during this stage.",
@@ -816,6 +816,10 @@ async function submitUpload(){
   const title = document.getElementById("upName").value.trim();
   if(!title){ toast(t("up_need_name")); return; }
   if(!currentUser){ toast(t("up_need_login")); openLogin(); return; }
+  const coverFile = document.getElementById("upCover").files[0];
+  if(coverFile && coverFile.size > 5*1024*1024){ toast(t("up_img_big")); return; }
+  let linkVal = document.getElementById("upLink").value.trim();
+  if(linkVal && !/^https?:\/\//i.test(linkVal)) linkVal = "https://" + linkVal;
   const btn = document.getElementById("publishBtn");
   btn.disabled = true; btn.textContent = t("up_publishing");
   try{
@@ -835,7 +839,7 @@ async function submitUpload(){
       title,
       category: document.getElementById("upCat").value,
       description: document.getElementById("upDesc").value.trim() || null,
-      link: safeUrl(document.getElementById("upLink").value.trim()) || null,
+      link: safeUrl(linkVal) || null,
       cover_url,
       price: 0,
       accept_tips: true
