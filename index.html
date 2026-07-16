@@ -308,22 +308,6 @@ footer{border-top:1px solid var(--border);margin-top:56px;background:var(--bg2)}
     </div>
   </div>
 
-  <!-- TESTIMONIALS -->
-  <div class="container section reveal">
-    <div class="section-head">
-      <div class="eyebrow" data-i18n="q_eye"></div>
-      <h2 data-i18n="q_title"></h2>
-    </div>
-    <div class="quotes">
-      <div class="quote"><p data-i18n="q1"></p>
-        <div class="quote-who"><div class="avatar" style="background:#efe3d3">KT</div><div><b>Kenji T.</b><span data-i18n="q1_who"></span></div></div></div>
-      <div class="quote"><p data-i18n="q2"></p>
-        <div class="quote-who"><div class="avatar" style="background:#e3e9dd">LW</div><div><b>Luna W.</b><span data-i18n="q2_who"></span></div></div></div>
-      <div class="quote"><p data-i18n="q3"></p>
-        <div class="quote-who"><div class="avatar" style="background:#e7e2ee">MS</div><div><b>Maria S.</b><span data-i18n="q3_who"></span></div></div></div>
-    </div>
-  </div>
-
   <!-- FEE TRANSPARENCY -->
   <div class="container section reveal">
     <div class="section-head">
@@ -707,14 +691,7 @@ let lang = "zh";
 const t = k => I[lang][k] || k;
 
 /* ============ Demo seed data ============ */
-const DEMO = [
- {demo:1,title:{zh:"一鍵履歷生成器",en:"One-click Resume Builder"},owner_name:"Kenji T.",category:"app",likeCount:41,price:5},
- {demo:1,title:{zh:"賽博朋克城市插畫集",en:"Cyberpunk City Art Pack"},owner_name:"Luna W.",category:"image",likeCount:35,price:12},
- {demo:1,title:{zh:"30 秒產品宣傳片模板",en:"30s Product Promo Template"},owner_name:"Maria S.",category:"video",likeCount:29,price:25},
- {demo:1,title:{zh:"小店老闆營銷 Prompt 包",en:"Marketing Prompts for Small Biz"},owner_name:"PromptLab",category:"prompt",likeCount:52,price:8},
- {demo:1,title:{zh:"Excel 自動報表工具",en:"Excel Auto-report Tool"},owner_name:"SheetsGuru",category:"tool",likeCount:120,price:0},
- {demo:1,title:{zh:"AI 食譜推薦 App",en:"AI Recipe Finder App"},owner_name:"Foodie AI",category:"app",likeCount:87,price:0}
-];
+const DEMO = [];
 DEMO.forEach((w,i)=>{ w.id = "demo-"+i; });
 const TINTS = ["#efe4d2","#e2e9db","#e6e1ee","#f0e2dd","#dfe8ec","#ece7d8"];
 const AV_TINTS = ["#efe3d3","#e3e9dd","#e7e2ee","#eee2df"];
@@ -743,7 +720,7 @@ function renderStats(){
   const creators = new Set(realWorks.map(w=>w.owner)).size;
   const likes = realWorks.reduce((s,w)=>s+w.likeCount,0) + DEMO.reduce((s,w)=>s+w.likeCount,0);
   document.getElementById("statWorks").textContent = (realWorks.length + DEMO.length).toLocaleString();
-  document.getElementById("statCreators").textContent = (creators + 6).toLocaleString();
+  document.getElementById("statCreators").textContent = creators.toLocaleString();
   document.getElementById("statLikes").textContent = likes.toLocaleString();
 }
 
